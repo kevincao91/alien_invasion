@@ -29,8 +29,10 @@ class Settings():
         self.fleet_direction = 1  # 后面有再初始化设置
 
         # 初始击落外星人得分
-        self.alien_points = 50     # 后面有再初始化设置
+        self.alien_points = 5     # 后面有再初始化设置
 
+        # 外星人点数的提高速度
+        self.score_scale = 1.5
         #  加快游戏节奏参数
         self.speedup_scale = 2
         self.initialize_dynamic_settings()
@@ -42,10 +44,12 @@ class Settings():
         self.alien_speed_factor = 1
         # fleet_direction为1表示向右；为-1表示向左
         self.fleet_direction = 1
-        self.alien_points = 50
+        self.alien_points = 5
 
     def increase_speed(self):
         #  提高速度设置
         self.ship_speed_factor *= self.speedup_scale
         self.bullet_speed_factor *= self.speedup_scale
         self.alien_speed_factor *= self.speedup_scale
+        self.alien_points = int(self.alien_points * self.score_scale)
+        print(self.alien_points)
