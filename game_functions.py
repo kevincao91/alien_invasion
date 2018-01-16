@@ -3,6 +3,7 @@ import pygame
 from bullet import Bullet
 from alien import Aliens
 from time import sleep
+import json
 
 
 def check_keydown_events(event, stats, screen, global_set, score_board, ship, aliens, bullets):
@@ -14,9 +15,15 @@ def check_keydown_events(event, stats, screen, global_set, score_board, ship, al
     elif event.key == pygame.K_SPACE:
         fire_bullet(global_set, screen, ship, bullets)
     elif event.key == pygame.K_q:
-        sys.exit()
+        quit_game(stats, global_set)
     elif event.key == pygame.K_RETURN:
         check_enter_button(global_set, screen, stats, score_board, ship, aliens, bullets)
+
+
+def quit_game(stats, global_set):
+    with open(global_set.info_file, 'w') as fileobject:
+        json.dump(stats.high_score, fileobject)
+    sys.exit()
 
 
 def check_keyup_events(event, ship):
@@ -36,10 +43,7 @@ def initialize_and_start_game(global_set, screen, stats, score_board, aliens, sh
     stats.reset_stats()
     stats.game_active = True
     # 重置记分牌图像
-    score_board.prep_score()
-    score_board.prep_high_score()
-    score_board.prep_level()
-    score_board.prep_ships()
+    score_board.prep_images()
     #  清空外星人列表和子弹列表
     aliens.empty()
     bullets.empty()
@@ -122,13 +126,17 @@ def check_bullet_alien_collisions(global_set, stats, screen, score_board, ship, 
         check_high_score(stats, score_board)
 
     if len(aliens) == 0:
-        #  删除现有的所有子弹，并创建一个新的外星人群
-        bullets.empty()
-        global_set.increase_speed()
-        create_fleet(global_set, screen, ship, aliens)
-        # 提高等级
-        stats.level += 1
-        score_board.prep_level()
+        start_new_level(global_set, screen, stats, score_board, ship, aliens, bullets)
+
+
+def start_new_level(global_set, screen, stats, score_board, ship, aliens, bullets):
+    #  删除现有的所有子弹，并创建一个新的外星人群
+    bullets.empty()
+    global_set.increase_speed()
+    create_fleet(global_set, screen, ship, aliens)
+    # 提高等级
+    stats.level += 1
+    score_board.prep_level()
 
 
 def update_bullets(global_set, stats, screen, score_board, ship, aliens, bullets):
@@ -158,7 +166,7 @@ def get_number_aliens_x(global_set, alien_width):
 
 def get_number_rows(global_set, ship_height, alien_height):
     #  计算屏幕可容纳多少行外星人
-    available_space_y = (global_set.screen_height - (3 * alien_height) - ship_height)
+    available_space_y = (global_set.screen_height - alien_height - ship_height) * global_set.alien_high_fill_factor
     number_rows = int(available_space_y / (2 * alien_height))
     return number_rows
 

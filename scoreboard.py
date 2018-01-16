@@ -14,7 +14,10 @@ class Scoreboards():
         # 显示得分信息时使用的字体设置
         self.text_color = (30, 30, 30)
         self.font = pygame.font.SysFont(None, 48)
-        # 准备包含最高得分和当前得分的图像
+        # 准备包含最高得分、当前得分、等级和飞船数的图像
+        self.prep_images()
+
+    def prep_images(self):
         self.prep_score()
         self.prep_high_score()
         self.prep_level()

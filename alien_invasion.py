@@ -1,9 +1,6 @@
-
-
 import pygame
 from setting import Settings
 from ship import Ships
-from alien import Aliens
 import game_functions as gf
 from pygame.sprite import Group
 from game_stats import GameStats
