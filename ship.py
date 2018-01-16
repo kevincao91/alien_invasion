@@ -24,12 +24,21 @@ class Ships():
         # 根据移动标志调整飞船的位置
         #  更新飞船的 center 值，而不是 rect
         if self.moving_right and self.rect.right < self.screen_rect.right:
-            self.center += self.global_set.speed_factor
+            self.center += self.global_set.ship_speed_factor
         if self.moving_left and self.rect.left > 0:
-            self.center -= self.global_set.speed_factor
+            self.center -= self.global_set.ship_speed_factor
         #  根据 self.center 更新 rect 对象
         self.rect.centerx = self.center
 
     def blitme(self):
         # 在指定位置绘制飞船
         self.screen.blit(self.image, self.rect)
+
+    def center_ship(self):
+        #  让飞船在屏幕上居中
+        #  将每艘新飞船放在屏幕底部中央
+        #  将飞船放在屏幕底部中央
+        self.rect.centerx = self.screen_rect.centerx
+        self.rect.bottom = self.screen_rect.bottom
+        #  在飞船的属性 center 中存储小数值
+        self.center = float(self.rect.centerx)
