@@ -6,6 +6,18 @@ from time import sleep
 import json
 
 
+def check_full_screen(global_set):
+    global_set.window_width = pygame.display.Info().current_w
+    global_set.window_height = pygame.display.Info().current_h
+    #  是否全屏
+    if global_set.full_screen:
+        global_set.flags = pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF
+        global_set.screen_width = global_set.window_width
+        global_set.screen_height = global_set.window_height
+    else:
+        global_set.flags = 0
+
+
 def check_keydown_events(event, stats, screen, global_set, score_board, ship, aliens, bullets):
     # 响应按键
     if event.key == pygame.K_RIGHT:
@@ -48,7 +60,7 @@ def initialize_and_start_game(global_set, screen, stats, score_board, aliens, sh
     aliens.empty()
     bullets.empty()
     #  创建一群新的外星人，并让飞船居中
-    create_fleet(global_set, screen, ship, aliens)
+    create_fleet(global_set, screen, score_board, ship, aliens)
     ship.center_ship()
 
 
@@ -85,20 +97,20 @@ def check_events(global_set, screen, stats, score_board, play_button, ship, alie
 def update_screen(global_set, stats, screen, score_board, ship, aliens, bullets, play_button):
     #  更新屏幕上的图像，并切换到新屏幕
     #  每次循环时都重绘屏幕
+    #  1、最底层  背景色
     screen.fill(global_set.bg_color)
-    #  绘制飞船
-    ship.blitme()
-    #  绘制外星人群
+    #  2、绘制外星人群
     aliens.draw(screen)
-
-    #  在飞船和外星人后面重绘所有子弹
+    #  3、在飞船和外星人后面重绘所有子弹
     for bullet in bullets.sprites():
         bullet.draw_bullet()
-
-    # 显示得分
+    #  4、绘制飞船
+    ship.blitme()
+    #  5、绘制分数栏
+    screen.fill(score_board.score_bar_bg_color, score_board.score_bar_rect)
+    #  6、显示得分
     score_board.show_score()
-
-    #  如果游戏处于非活动状态，就绘制 Play 按钮
+    #  7、如果游戏处于非活动状态，就绘制 Play 按钮
     if not stats.game_active:
         play_button.draw_button()
 
@@ -133,7 +145,7 @@ def start_new_level(global_set, screen, stats, score_board, ship, aliens, bullet
     #  删除现有的所有子弹，并创建一个新的外星人群
     bullets.empty()
     global_set.increase_speed()
-    create_fleet(global_set, screen, ship, aliens)
+    create_fleet(global_set, screen, score_board, ship, aliens)
     # 提高等级
     stats.level += 1
     score_board.prep_level()
@@ -144,7 +156,7 @@ def update_bullets(global_set, stats, screen, score_board, ship, aliens, bullets
     bullets.update()
     #  删除已消失的子弹
     for bullet in bullets.copy():
-        if bullet.rect.bottom <= 0:
+        if bullet.rect.bottom <= score_board.score_bar_height:
             bullets.remove(bullet)
     check_bullet_alien_collisions(global_set, stats, screen, score_board, ship, aliens, bullets)
 
@@ -164,34 +176,35 @@ def get_number_aliens_x(global_set, alien_width):
     return number_aliens_x
 
 
-def get_number_rows(global_set, ship_height, alien_height):
+def get_number_rows(global_set, score_board, ship_height, alien_height):
     #  计算屏幕可容纳多少行外星人
-    available_space_y = (global_set.screen_height - alien_height - ship_height) * global_set.alien_high_fill_factor
+    available_space_y = (global_set.screen_height - score_board.score_bar_height - ship_height) * \
+                        global_set.alien_high_fill_factor
     number_rows = int(available_space_y / (2 * alien_height))
     return number_rows
 
 
-def create_alien(global_set, screen, aliens, alien_number, row_number):
+def create_alien(global_set, screen, score_board, aliens, alien_number, row_number):
     #  创建一个外星人并将其放在当前行
     alien = Aliens(global_set, screen)
     alien_width = alien.rect.width
     alien.x = alien_width + 2 * alien_width * alien_number
     alien.rect.x = alien.x
-    alien.y = alien.rect.height + 2 * alien.rect.height * row_number
+    alien.y = score_board.score_bar_height + alien.rect.height * 0.5 + 2 * alien.rect.height * row_number
     alien.rect.y = alien.y
     aliens.add(alien)
 
 
-def create_fleet(global_set, screen, ship, aliens):
+def create_fleet(global_set, screen, score_board, ship, aliens):
     #  创建外星人群
     #  创建一个外星人，并计算每行可容纳多少个外星人
     alien = Aliens(global_set, screen)
     number_aliens_x = get_number_aliens_x(global_set, alien.rect.width)
-    number_rows = get_number_rows(global_set, ship.rect.height, alien.rect.height)
+    number_rows = get_number_rows(global_set, score_board, ship.rect.height, alien.rect.height)
     #  创建第一行外星人
     for row_number in range(number_rows):
         for alien_number in range(number_aliens_x):
-            create_alien(global_set, screen, aliens, alien_number, row_number)
+            create_alien(global_set, screen, score_board, aliens, alien_number, row_number)
 
 
 def check_fleet_edges(global_set, aliens):
@@ -221,7 +234,7 @@ def ship_hit(global_set, stats, screen, score_board, ship, aliens, bullets):
         aliens.empty()
         bullets.empty()
         #  创建一群新的外星人，并将飞船放到屏幕底端中央
-        create_fleet(global_set, screen, ship, aliens)
+        create_fleet(global_set, screen, score_board, ship, aliens)
         ship.center_ship()
         #  暂停
         sleep(0.5)

@@ -4,9 +4,13 @@ class Settings():
         #  初始化游戏的静态设置
 
         #  屏幕设置
-        self.screen_width = 1200
-        self.screen_height = 800
+        self.screen_width = 600
+        self.screen_height = 300
         self.bg_color = (230, 230, 230)
+        self.full_screen = False
+        self.flags = 0  # 全屏参数
+        self.window_width = self.screen_width
+        self.window_height = self.screen_height
 
         #  标题设置
         self.game_title = "Alien Invasion"
@@ -20,7 +24,7 @@ class Settings():
 
         #  子弹设置
         self.bullet_speed_factor = 2  # 后面有再初始化设置
-        self.bullet_width = 800
+        self.bullet_width = 900
         self.bullet_height = 15
         self.bullet_color = 255, 60, 60
         self.bullets_allowed = 20
@@ -38,8 +42,8 @@ class Settings():
         # 外星人点数的提高速度
         self.score_scale = 1.5
         #  加快游戏节奏参数
-        self.ship_speedup_scale = 1.2
-        self.bullet_speedup_scale = 1.2
+        self.ship_speedup_scale = 1.5
+        self.bullet_speedup_scale = 1.5
         self.alien_speedup_scale = 1.5
         self.initialize_dynamic_settings()
 

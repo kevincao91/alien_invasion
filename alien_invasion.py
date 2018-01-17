@@ -12,8 +12,10 @@ def run_game():
     #  初始化游戏并创建一个屏幕对象
     pygame.init()
     global_set = Settings()
-
-    screen = pygame.display.set_mode((global_set.screen_width, global_set.screen_height))
+    #  设置全屏参数
+    gf.check_full_screen(global_set)
+    screen = pygame.display.set_mode((global_set.screen_width, global_set.screen_height), global_set.flags)
+    #  设置标题
     pygame.display.set_caption(global_set.game_title)
 
     #  创建 Play 按钮
@@ -31,7 +33,7 @@ def run_game():
     aliens = Group()
 
     #  创建外星人群
-    gf.create_fleet(global_set, screen, ship, aliens)
+    gf.create_fleet(global_set, screen, score_board, ship, aliens)
 
     #  开始游戏的主循环
     while True:
