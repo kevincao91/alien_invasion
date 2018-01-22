@@ -12,8 +12,14 @@ from mousecursor import MouseCursors
 
 def run_game():
     #  初始化游戏并创建一个屏幕对象
+    # 定义时钟
+    clock = pygame.time.Clock()
+    #  pygame初始化
     pygame.init()
     pygame.mixer.init()
+    #  加载背景音乐
+    pygame.mixer.music.load('audio/BGM.mp3')
+    pygame.mixer.music.play(-1, 0.0)
     pygame.time.delay(1000)  # 等待1秒让mixer完成初始化
     global_set = Settings()
     #  设置全屏参数
@@ -24,9 +30,6 @@ def run_game():
     #  创建背景图和鼠标图
     back_ground = BackGrounds(global_set, screen)
     mouse_cursor = MouseCursors(global_set, screen)
-    #  加载背景音乐
-    pygame.mixer.music.load('audio/BGM.mp3')
-    pygame.mixer.music.play(-1, 0.0)
     #  创建 Play 按钮
     play_button = Buttons(global_set, screen, "Play")
     #  创建一个用于存储游戏统计信息的实例
@@ -45,6 +48,11 @@ def run_game():
     gf.create_fleet(global_set, screen, stats, score_board, ship, aliens)
     #  开始游戏的主循环
     while True:
+        #  控制游戏最大帧率归零
+        clock.tick(global_set.FRAME_RATE)
+        #  画面帧标示
+        if global_set.ticks >= global_set.ANIMATE_CYCLE:
+            global_set.ticks = 0
         #  监视键盘和鼠标事件
         gf.check_events(global_set, screen, stats, score_board, play_button, ship, aliens, bullets, mouse_cursor)
 
@@ -55,7 +63,11 @@ def run_game():
             gf.update_aliens(global_set, stats, screen, score_board, ship, aliens, bullets)
 
         #  每次循环时都重绘屏幕
-        gf.update_screen(back_ground, mouse_cursor, stats, screen, score_board, ship, aliens, bullets, play_button)
+        gf.update_screen(back_ground, mouse_cursor, stats, screen, score_board, ship, aliens, bullets, play_button, fires)
+        # +1
+        global_set.ticks += 1
+
+# ======================================================================================================================
 
 
 run_game()

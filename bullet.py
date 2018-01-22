@@ -8,6 +8,7 @@ class Bullet(Sprite):
         #  在飞船所处的位置创建一个子弹对象
         super().__init__()
         self.screen = screen
+        self.global_set = global_set
         #  加载子弹声音
         self.audio = 'audio/biu.wav'
         #  加载子弹图像，并设置其 rect 属性
@@ -20,6 +21,36 @@ class Bullet(Sprite):
         self.y = float(self.rect.y)
         self.color = global_set.bullet_color
         self.bullet_speed_factor = global_set.bullet_speed_factor
+        #  火花爆炸序号
+        self.explode_index = 0
+        self.initial_fire()
+
+    def initial_fire(self):
+        fire_img = pygame.image.load('images/fire_seq.png').convert_alpha()
+        self.fire_surface = list()
+        self.fire_surface.append(fire_img.subsurface(pygame.Rect(0, 0, 40, 40)))
+        self.fire_surface.append(fire_img.subsurface(pygame.Rect(40, 0, 40, 40)))
+        self.fire_surface.append(fire_img.subsurface(pygame.Rect(80, 0, 40, 40)))
+        self.fire_surface.append(fire_img.subsurface(pygame.Rect(120, 0, 40, 40)))
+        self.fire_surface.append(fire_img.subsurface(pygame.Rect(160, 0, 40, 40)))
+        self.fire_surface.append(fire_img.subsurface(pygame.Rect(200, 0, 40, 40)))
+        self.fire_surface.append(fire_img.subsurface(pygame.Rect(240, 0, 40, 40)))
+        self.fire_surface.append(fire_img.subsurface(pygame.Rect(280, 0, 40, 40)))
+        self.fire_rect = self.fire_surface[1].get_rect()
+        self.fire_rect.centery = self.rect.top
+
+    def show_fire(self, fires):
+        # 绘制爆炸效果
+        self.fire_rect.centery = self.rect.top
+        self.fire_rect.centerx = self.rect.centerx
+        self.screen.blit(self.fire_surface[self.explode_index], self.fire_rect)
+
+        # if self.global_set.ticks % (self.global_set.ANIMATE_CYCLE // 2) == 0:
+        if self.global_set.ticks % 10 == 0:
+            if self.explode_index < 7:
+                self.explode_index += 1
+            else:
+                fires.remove(self)
 
     def update(self):
         #  向上移动子弹

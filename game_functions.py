@@ -101,7 +101,7 @@ def check_events(global_set, screen, stats, score_board, play_button, ship, alie
             mouse_cursor.update(mouse_x, mouse_y)
 
 
-def update_screen(back_ground, mouse_cursor, stats, screen, score_board, ship, aliens, bullets, play_button):
+def update_screen(back_ground, mouse_cursor, stats, screen, score_board, ship, aliens, bullets, play_button, fires):
     #  更新屏幕上的图像，并切换到新屏幕
     #  每次循环时都重绘屏幕
     #  1、最底层  背景色
@@ -114,6 +114,9 @@ def update_screen(back_ground, mouse_cursor, stats, screen, score_board, ship, a
         bullet.draw_bullet()
     #  4、绘制飞船
     ship.blitme()
+    #  5 绘制爆炸效果
+    for fire in fires:
+        fire.show_fire(fires)
     #  5、绘制分数栏
     screen.fill(score_board.score_bar_bg_color, score_board.score_bar_rect)
     #  6、显示得分
@@ -148,10 +151,10 @@ def sound_aliens(stats):
     sound.play()
 
 
-def create_fire(collisions, stats, screen, score_board, ship, aliens, bullets, fires):
+def create_fire(collisions, bullets, fires):
     #  更新子弹的位置
     bullets.update()
-    #
+    #  将碰撞子弹放入fires
     fires.add(collisions)
 
 
@@ -159,7 +162,6 @@ def check_bullet_alien_collisions(global_set, stats, screen, score_board, ship, 
     #  响应子弹和外星人的碰撞
     #  删除发生碰撞的子弹和外星人
     collisions = pygame.sprite.groupcollide(bullets, aliens, True, True)
-    print(collisions.values())
     if collisions:
         # 计算碰撞字典中碰撞个数并计算得分
         for liens in collisions.values():
@@ -167,7 +169,7 @@ def check_bullet_alien_collisions(global_set, stats, screen, score_board, ship, 
             if len(liens):
                 sound_aliens(stats)
         #  创建火花
-        #  create_fire(collisions, stats, screen, score_board, ship, aliens, bullets, fires)
+        create_fire(collisions, bullets, fires)
         #  更新计分牌
         score_board.prep_score()
         check_high_score(stats, score_board)

@@ -12,13 +12,16 @@ class Settings():
         self.flags = 0  # 全屏参数
         self.window_width = self.screen_width
         self.window_height = self.screen_height
-
         #  标题设置
         self.game_title = "Alien Invasion"
-
         #  游戏信息存储文件路径设置
         self.info_file = "game_info.json"
-
+        # 定义画面帧率
+        self.FRAME_RATE = 600
+        # 定义动画周期（帧数）
+        self.ANIMATE_CYCLE = 600
+        # 定义画面帧标示
+        self.ticks = 0
         #  飞船设置
         self.ship_speed_factor = 0.7  # 后面有再初始化设置
         self.ship_limit = 3
@@ -33,7 +36,7 @@ class Settings():
         #  外星人设置
         self.alien_high_fill_factor = 0.6
         self.alien_speed_factor = 0.5  # 后面有再初始化设置
-        self.fleet_drop_speed = 20
+        self.fleet_drop_speed = 5
         # fleet_direction 为 1 表示向右移，为 -1 表示向左移
         self.fleet_direction = 1  # 后面有再初始化设置
 
