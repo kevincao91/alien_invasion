@@ -4,9 +4,10 @@ class Settings():
         #  初始化游戏的静态设置
 
         #  屏幕设置
-        self.screen_width = 600
-        self.screen_height = 300
+        self.screen_width = 800
+        self.screen_height = 600
         self.bg_color = (230, 230, 230)
+        self.mouse_image_filename = "images/mouse.png"
         self.full_screen = False
         self.flags = 0  # 全屏参数
         self.window_width = self.screen_width
@@ -19,19 +20,19 @@ class Settings():
         self.info_file = "game_info.json"
 
         #  飞船设置
-        self.ship_speed_factor = 1.5  # 后面有再初始化设置
+        self.ship_speed_factor = 0.7  # 后面有再初始化设置
         self.ship_limit = 3
 
         #  子弹设置
-        self.bullet_speed_factor = 2  # 后面有再初始化设置
-        self.bullet_width = 900
+        self.bullet_speed_factor = 0.7  # 后面有再初始化设置
+        self.bullet_width = 10
         self.bullet_height = 15
         self.bullet_color = 255, 60, 60
         self.bullets_allowed = 20
 
         #  外星人设置
         self.alien_high_fill_factor = 0.6
-        self.alien_speed_factor = 1  # 后面有再初始化设置
+        self.alien_speed_factor = 0.5  # 后面有再初始化设置
         self.fleet_drop_speed = 20
         # fleet_direction 为 1 表示向右移，为 -1 表示向左移
         self.fleet_direction = 1  # 后面有再初始化设置
@@ -40,18 +41,18 @@ class Settings():
         self.alien_points = 5     # 后面有再初始化设置
 
         # 外星人点数的提高速度
-        self.score_scale = 1.5
+        self.score_scale = 1.2
         #  加快游戏节奏参数
-        self.ship_speedup_scale = 1.5
-        self.bullet_speedup_scale = 1.5
-        self.alien_speedup_scale = 1.5
+        self.ship_speedup_scale = 1.2
+        self.bullet_speedup_scale = 1.2
+        self.alien_speedup_scale = 1.2
         self.initialize_dynamic_settings()
 
     def initialize_dynamic_settings(self):
         #  初始化随游戏进行而变化的设置
-        self.ship_speed_factor = 1.5
-        self.bullet_speed_factor = 2
-        self.alien_speed_factor = 1
+        self.ship_speed_factor = 0.7
+        self.bullet_speed_factor = 0.7
+        self.alien_speed_factor = 0.5
         # fleet_direction为1表示向右；为-1表示向左
         self.fleet_direction = 1
         self.alien_points = 5

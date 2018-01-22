@@ -8,8 +8,12 @@ class Bullet(Sprite):
         #  在飞船所处的位置创建一个子弹对象
         super().__init__()
         self.screen = screen
-        #  在 (0,0) 处创建一个表示子弹的矩形，再设置正确的位置
-        self.rect = pygame.Rect(0, 0, global_set.bullet_width, global_set.bullet_height)
+        #  加载子弹声音
+        self.audio = 'audio/biu.wav'
+        #  加载子弹图像，并设置其 rect 属性
+        self.image = pygame.image.load('images/timg.png').convert_alpha()
+        self.rect = self.image.get_rect()
+        #  设置正确的位置
         self.rect.centerx = little_cute.rect.centerx
         self.rect.top = little_cute.rect.top
         # 存储用小数表示的子弹位置
@@ -26,4 +30,9 @@ class Bullet(Sprite):
 
     def draw_bullet(self):
         #  在屏幕上绘制子弹
-        pygame.draw.rect(self.screen, self.color, self.rect)
+        self.screen.blit(self.image, self.rect)
+
+    def suondme(self):
+        sound = pygame.mixer.Sound(self.audio)
+        sound.play()
+

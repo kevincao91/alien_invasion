@@ -9,6 +9,8 @@ class GameStats():
         self.ships_left = global_set.ship_limit
         self.score = 0
         self.level = 1
+        self.sleep_before_flag = False
+        self.sleep_after_flag = False
         # 在任何情况下都不应重置最高得分
         self.high_score = 0
         #  让游戏一开始处于非活动状态

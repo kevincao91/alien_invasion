@@ -2,17 +2,15 @@ import pygame
 from pygame.sprite import Sprite
 
 
-class Ships(Sprite):
+class ShipScoreBoard(Sprite):
 
     def __init__(self, global_set, screen):
         super().__init__()
         #  初始化飞船并设置其初始位置 """
         self.screen = screen
         self.global_set = global_set
-        #  加载飞船撞击声音
-        self.audio = 'audio/explo.wav'
         #  加载飞船图像并获取其外接矩形
-        self.image = pygame.image.load('images/littlecute.png').convert_alpha()
+        self.image = pygame.image.load('images/littlecute2.png').convert_alpha()
         self.rect = self.image.get_rect()
         self.screen_rect = screen.get_rect()
         #  将飞船放在屏幕底部中央
@@ -46,7 +44,3 @@ class Ships(Sprite):
         self.rect.bottom = self.screen_rect.bottom
         #  在飞船的属性 center 中存储小数值
         self.center = float(self.rect.centerx)
-
-    def soundme(self):
-        sound = pygame.mixer.Sound(self.audio)
-        sound.play()

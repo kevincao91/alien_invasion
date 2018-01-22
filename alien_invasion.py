@@ -6,21 +6,29 @@ from pygame.sprite import Group
 from game_stats import GameStats
 from button import Buttons
 from scoreboard import Scoreboards
+from background import BackGrounds
+from mousecursor import MouseCursors
 
 
 def run_game():
     #  初始化游戏并创建一个屏幕对象
     pygame.init()
+    pygame.mixer.init()
+    pygame.time.delay(1000)  # 等待1秒让mixer完成初始化
     global_set = Settings()
     #  设置全屏参数
     gf.check_full_screen(global_set)
     screen = pygame.display.set_mode((global_set.screen_width, global_set.screen_height), global_set.flags)
     #  设置标题
     pygame.display.set_caption(global_set.game_title)
-
+    #  创建背景图和鼠标图
+    back_ground = BackGrounds(global_set, screen)
+    mouse_cursor = MouseCursors(global_set, screen)
+    #  加载背景音乐
+    pygame.mixer.music.load('audio/BGM.mp3')
+    pygame.mixer.music.play(-1, 0.0)
     #  创建 Play 按钮
     play_button = Buttons(global_set, screen, "Play")
-
     #  创建一个用于存储游戏统计信息的实例
     stats = GameStats(global_set)
     #  创建记分牌
@@ -31,23 +39,23 @@ def run_game():
     bullets = Group()
     #  创建一个用于储存外星人的编组
     aliens = Group()
-
+    #  创建一个用于储存火花的编组
+    fires = Group()
     #  创建外星人群
-    gf.create_fleet(global_set, screen, score_board, ship, aliens)
-
+    gf.create_fleet(global_set, screen, stats, score_board, ship, aliens)
     #  开始游戏的主循环
     while True:
         #  监视键盘和鼠标事件
-        gf.check_events(global_set, screen, stats, score_board, play_button, ship, aliens, bullets)
+        gf.check_events(global_set, screen, stats, score_board, play_button, ship, aliens, bullets, mouse_cursor)
 
         if stats.game_active:
             #  事物更新
             ship.update()
-            gf.update_bullets(global_set, stats, screen, score_board, ship, aliens, bullets)
+            gf.update_bullets(global_set, stats, screen, score_board, ship, aliens, bullets, fires)
             gf.update_aliens(global_set, stats, screen, score_board, ship, aliens, bullets)
 
         #  每次循环时都重绘屏幕
-        gf.update_screen(global_set, stats, screen, score_board, ship, aliens, bullets, play_button)
+        gf.update_screen(back_ground, mouse_cursor, stats, screen, score_board, ship, aliens, bullets, play_button)
 
 
 run_game()

@@ -1,7 +1,7 @@
 import pygame
 import pygame.font
 from pygame.sprite import Group
-from ship import Ships
+from shipscoreboard import ShipScoreBoard
 
 
 class Scoreboards():
@@ -14,7 +14,7 @@ class Scoreboards():
         self.stats = stats
         # 显示得分信息时使用的字体设置
         self.text_color = (30, 30, 30)
-        self.font = pygame.font.SysFont(None, 48)
+        self.font = pygame.font.SysFont(None, 32)
         #  确定分数栏高度、宽度、背景色
         self.score_bar_height = 50
         self.score_bar_width = self.screen_rect.width
@@ -79,15 +79,17 @@ class Scoreboards():
         self.level_image = self.font.render(alien_level_str, True, self.text_color, self.score_bar_bg_color)
         # 将等级放在得分左方
         self.level_rect = self.level_image.get_rect()
-        self.level_rect.right = self.score_rect.right - 260
+        self.level_rect.right = self.score_rect.right - 160
         self.level_rect.centery = self.score_bar_rect.centery
 
     def prep_ships(self):
         #  显示还余下多少艘飞船
         self.ships = Group()
         for ship_number in range(self.stats.ships_left):
-            ship = Ships(self.global_set, self.screen)
-            ship.rect.x = 10 + ship_number * ship.rect.width
-            ship.rect.y = 0
+            ship = ShipScoreBoard(self.global_set, self.screen)
+            ship.rect.centery = self.score_bar_rect.centery
+            ship.rect.x = 10 + ship_number * (ship.rect.width + 5)
             self.ships.add(ship)
+
+
 
