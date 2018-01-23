@@ -1,8 +1,10 @@
+import pygame
+
+
 class Settings():
     # 配置游戏所有的设置数据
     def __init__(self):
         #  初始化游戏的静态设置
-
         #  屏幕设置
         self.screen_width = 800
         self.screen_height = 600
@@ -22,6 +24,13 @@ class Settings():
         self.ANIMATE_CYCLE = 600
         # 定义画面帧标示
         self.ticks = 0
+        #  声音设置声音
+        self.begin_audio_file = 'audio/ready_go.wav'
+        self.begin_audio = pygame.mixer.Sound(self.begin_audio_file)
+        self.begin_audio_channel = pygame.mixer.Channel(1)
+        self.ship_hit_audio_file = 'audio/explo.wav'
+        self.ship_hit_audio = pygame.mixer.Sound(self.ship_hit_audio_file)
+        self.ship_hit_audio_channel = pygame.mixer.Channel(2)
         #  飞船设置
         self.ship_speed_factor = 0.7  # 后面有再初始化设置
         self.ship_limit = 3

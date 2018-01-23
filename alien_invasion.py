@@ -58,14 +58,23 @@ def run_game():
 
         if stats.game_active:
             #  事物更新
-            ship.update()
-            gf.update_bullets(global_set, stats, screen, score_board, ship, aliens, bullets, fires)
-            gf.update_aliens(global_set, stats, screen, score_board, ship, aliens, bullets)
+            #  能否移动飞船
+            if not stats.ship_freeze_flag:
+                ship.update()
+            else:
+                gf.check_sound(global_set, stats)
+            #  能否移动外星人和子弹
+            if not stats.aliens_bullet_freeze_flag:
+                gf.update_aliens(global_set, stats, screen, score_board, ship, aliens, bullets)
+                gf.update_bullets(global_set, stats, screen, score_board, ship, aliens, bullets, fires)
+            else:
+                gf.check_sound(global_set, stats)
+            #  更新火花
             gf.update_fires(fires)
 
         #  每次循环时都重绘屏幕
         gf.update_screen(back_ground, mouse_cursor, stats, screen, score_board, ship, aliens, bullets, play_button, fires)
-        # +1
+        # ticks + 1
         global_set.ticks += 1
 
 # ======================================================================================================================

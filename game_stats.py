@@ -9,6 +9,9 @@ class GameStats():
         self.ships_left = global_set.ship_limit
         self.score = 0
         self.level = 1
+        #  初始化游戏状态标记
+        self.aliens_bullet_freeze_flag = True
+        self.ship_freeze_flag = False
         self.sleep_before_flag = False
         self.sleep_after_flag = False
         # 在任何情况下都不应重置最高得分

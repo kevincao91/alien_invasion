@@ -12,7 +12,8 @@ class Ships(Sprite):
         #  加载飞船撞击声音
         self.audio = 'audio/explo.wav'
         #  加载飞船图像并获取其外接矩形
-        self.image = pygame.image.load('images/littlecute.png').convert_alpha()
+        self.image = pygame.image.load('images/littlecute.png')
+        # self.image = pygame.image.load('images/littlecute.png').convert_alpha()
         self.rect = self.image.get_rect()
         self.screen_rect = screen.get_rect()
         #  将飞船放在屏幕底部中央

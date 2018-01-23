@@ -12,7 +12,6 @@ class Aliens(Sprite):
         self.global_set = global_set
         #  加载外星人图像，并设置其 rect 属性
         self.image = pygame.image.load('images/bigpig.png').convert_alpha()
-        # self.image = pygame.image.load('images/alien.png').convert_alpha()
         self.rect = self.image.get_rect()
         #  每个外星人最初都在屏幕左上角附近
         self.rect.x = self.rect.width/2

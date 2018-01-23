@@ -2,7 +2,6 @@ import sys
 import pygame
 from bullet import Bullet
 from alien import Aliens
-from time import sleep
 import json
 
 
@@ -32,7 +31,8 @@ def check_keydown_events(event, stats, screen, global_set, score_board, ship, al
         elif event.key == pygame.K_LEFT:
             ship.moving_left = True
         elif event.key == pygame.K_SPACE:
-            fire_bullet(global_set, screen, ship, bullets)
+            if not stats.aliens_bullet_freeze_flag:
+                fire_bullet(global_set, screen, ship, bullets)
 
 
 def quit_game(stats, global_set):
@@ -49,10 +49,8 @@ def check_keyup_events(event, ship):
         ship.moving_left = False
 
 
-def play_read_go():
-    audio = 'audio/ready_go.wav'
-    sound = pygame.mixer.Sound(audio)
-    sound.play()
+def play_read_go(global_set):
+    global_set.begin_audio_channel = global_set.begin_audio.play()
 
 
 def initialize_and_start_game(global_set, screen, stats, score_board, aliens, ship, bullets):
@@ -72,7 +70,7 @@ def initialize_and_start_game(global_set, screen, stats, score_board, aliens, sh
     create_fleet(global_set, screen, stats, score_board, ship, aliens)
     ship.center_ship()
     #  播放开始音效
-    play_read_go()
+    play_read_go(global_set)
     stats.sleep_after_flag = True
 
 
@@ -135,16 +133,14 @@ def update_screen(back_ground, mouse_cursor, stats, screen, score_board, ship, a
         play_button.draw_button()
         mouse_cursor.blitme()
     #  让最近绘制的屏幕可见
+    '''
     if stats.sleep_before_flag:
         #  暂停
         sleep(0.5)
         stats.sleep_before_flag = False
+    '''
     pygame.display.flip()
     #  pygame.display.update()
-    if stats.sleep_after_flag:
-        #  暂停
-        sleep(2)
-        stats.sleep_after_flag = False
 
 
 def check_high_score(stats, score_board):
@@ -152,6 +148,14 @@ def check_high_score(stats, score_board):
     if stats.score > stats.high_score:
         stats.high_score = stats.score
         score_board.prep_high_score()
+
+
+def check_sound(global_set, stats):  # 写这个函数
+    #
+    if not global_set.begin_audio_channel.get_busy():
+        stats.aliens_bullet_freeze_flag = False
+    if not global_set.ship_hit_audio_channel.get_busy():
+        stats.ship_freeze_flag = False
 
 
 def sound_aliens(stats):
@@ -177,14 +181,15 @@ def check_bullet_alien_collisions(global_set, stats, screen, score_board, ship, 
             stats.score += global_set.alien_points * len(liens)
             if len(liens):
                 sound_aliens(stats)
-        #  创建火花
+        #  创建火花状态
         create_fire(collisions, bullets, fires)
         #  更新计分牌
         score_board.prep_score()
         check_high_score(stats, score_board)
-
+    #  检测游戏结束
     if len(aliens) == 0:
-        start_new_level(global_set, screen, stats, score_board, ship, aliens, bullets)
+        if len(fires) == 0:
+            start_new_level(global_set, screen, stats, score_board, ship, aliens, bullets)
 
 
 def start_new_level(global_set, screen, stats, score_board, ship, aliens, bullets):
@@ -196,10 +201,12 @@ def start_new_level(global_set, screen, stats, score_board, ship, aliens, bullet
     create_fleet(global_set, screen, stats, score_board, ship, aliens)
     #  更新等级信息
     score_board.prep_level()
+    #  更新游戏状态
+    stats.aliens_bullet_freeze_flag = True
     stats.sleep_after_flag = True
     stats.sleep_before_flag = True
     #  播放开始音效
-    play_read_go()
+    play_read_go(global_set)
 
 
 def update_bullets(global_set, stats, screen, score_board, ship, aliens, bullets, fires):
@@ -278,8 +285,12 @@ def ship_hit(global_set, stats, screen, score_board, ship, aliens, bullets):
     #  响应被外星人撞到的飞船
     #  将 ships_left 减 1
     stats.ships_left -= 1
+    #  更新状态信息
     stats.sleep_before_flag = True
-    ship.soundme()
+    stats.ship_freeze_flag = True
+    #  播放撞击声
+    global_set.ship_hit_audio_channel = global_set.ship_hit_audio.play()
+    global_set.ship_hit_audio.play()
     # 更新记分牌
     score_board.prep_ships()
     #  处理子弹和飞船
@@ -326,3 +337,5 @@ def update_fires(fires):
         #  删除已消失的子弹
         if fire.explode_index >= 7:
             fires.remove(fire)
+
+

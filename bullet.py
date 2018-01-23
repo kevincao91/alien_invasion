@@ -13,7 +13,7 @@ class Bullet(Sprite):
         #  加载子弹声音
         self.audio = 'audio/biu.wav'
         #  加载子弹图像，并设置其 rect 属性
-        self.image = pygame.image.load('images/timg.png').convert_alpha()
+        self.image = pygame.image.load('images/bullet.png').convert_alpha()
         self.rect = self.image.get_rect()
         #  设置正确的位置
         self.rect.centerx = little_cute.rect.centerx
