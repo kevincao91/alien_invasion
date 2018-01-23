@@ -1,5 +1,6 @@
 import pygame
 from pygame.sprite import Sprite
+import math
 
 
 class Bullet(Sprite):
@@ -23,9 +24,11 @@ class Bullet(Sprite):
         self.bullet_speed_factor = global_set.bullet_speed_factor
         #  火花爆炸序号
         self.explode_index = 0
+        self.explode_index_float = 0
         self.initial_fire()
 
     def initial_fire(self):
+        #  读取火花图像序列
         fire_img = pygame.image.load('images/fire_seq.png').convert_alpha()
         self.fire_surface = list()
         self.fire_surface.append(fire_img.subsurface(pygame.Rect(0, 0, 40, 40)))
@@ -36,21 +39,20 @@ class Bullet(Sprite):
         self.fire_surface.append(fire_img.subsurface(pygame.Rect(200, 0, 40, 40)))
         self.fire_surface.append(fire_img.subsurface(pygame.Rect(240, 0, 40, 40)))
         self.fire_surface.append(fire_img.subsurface(pygame.Rect(280, 0, 40, 40)))
+        #  确定火花位置
         self.fire_rect = self.fire_surface[1].get_rect()
-        self.fire_rect.centery = self.rect.top
-
-    def show_fire(self, fires):
-        # 绘制爆炸效果
-        self.fire_rect.centery = self.rect.top
         self.fire_rect.centerx = self.rect.centerx
+
+    def blitme(self):
+        #  确定火花位置
+        self.fire_rect.centery = self.rect.top
+        #  在指定位置绘制火花
         self.screen.blit(self.fire_surface[self.explode_index], self.fire_rect)
 
-        # if self.global_set.ticks % (self.global_set.ANIMATE_CYCLE // 2) == 0:
-        if self.global_set.ticks % 10 == 0:
-            if self.explode_index < 7:
-                self.explode_index += 1
-            else:
-                fires.remove(self)
+    def update_fire(self):
+        #  更新爆炸图序列
+        self.explode_index_float += 0.1
+        self.explode_index = math.floor(self.explode_index_float)
 
     def update(self):
         #  向上移动子弹

@@ -47,7 +47,7 @@ class Settings():
         self.score_scale = 1.2
         #  加快游戏节奏参数
         self.ship_speedup_scale = 1.2
-        self.bullet_speedup_scale = 1.2
+        self.bullet_speedup_scale = 1.05
         self.alien_speedup_scale = 1.2
         self.initialize_dynamic_settings()
 

@@ -1,7 +1,6 @@
 import sys
 import pygame
 from bullet import Bullet
-from fire import Fires
 from alien import Aliens
 from time import sleep
 import json
@@ -50,6 +49,12 @@ def check_keyup_events(event, ship):
         ship.moving_left = False
 
 
+def play_read_go():
+    audio = 'audio/ready_go.wav'
+    sound = pygame.mixer.Sound(audio)
+    sound.play()
+
+
 def initialize_and_start_game(global_set, screen, stats, score_board, aliens, ship, bullets):
     #  重置游戏设置
     global_set.initialize_dynamic_settings()
@@ -66,6 +71,9 @@ def initialize_and_start_game(global_set, screen, stats, score_board, aliens, sh
     #  创建一群新的外星人，并让飞船居中
     create_fleet(global_set, screen, stats, score_board, ship, aliens)
     ship.center_ship()
+    #  播放开始音效
+    play_read_go()
+    stats.sleep_after_flag = True
 
 
 def check_enter_button(global_set, screen, stats, score_board, ship, aliens, bullets):
@@ -115,8 +123,9 @@ def update_screen(back_ground, mouse_cursor, stats, screen, score_board, ship, a
     #  4、绘制飞船
     ship.blitme()
     #  5 绘制爆炸效果
-    for fire in fires:
-        fire.show_fire(fires)
+    for fire in fires.sprites():
+        fire.blitme()
+    #  fires.draw(screen)
     #  5、绘制分数栏
     screen.fill(score_board.score_bar_bg_color, score_board.score_bar_rect)
     #  6、显示得分
@@ -128,13 +137,13 @@ def update_screen(back_ground, mouse_cursor, stats, screen, score_board, ship, a
     #  让最近绘制的屏幕可见
     if stats.sleep_before_flag:
         #  暂停
-        sleep(2)
+        sleep(0.5)
         stats.sleep_before_flag = False
     pygame.display.flip()
     #  pygame.display.update()
     if stats.sleep_after_flag:
         #  暂停
-        sleep(0.5)
+        sleep(2)
         stats.sleep_after_flag = False
 
 
@@ -188,6 +197,9 @@ def start_new_level(global_set, screen, stats, score_board, ship, aliens, bullet
     #  更新等级信息
     score_board.prep_level()
     stats.sleep_after_flag = True
+    stats.sleep_before_flag = True
+    #  播放开始音效
+    play_read_go()
 
 
 def update_bullets(global_set, stats, screen, score_board, ship, aliens, bullets, fires):
@@ -304,3 +316,13 @@ def update_aliens(global_set, stats, screen, score_board, ship, aliens, bullets)
         ship_hit(global_set, stats, screen, score_board, ship, aliens, bullets)
     #  检查是否有外星人到达屏幕底端
     check_aliens_bottom(global_set, stats, screen, score_board, ship, aliens, bullets)
+
+
+def update_fires(fires):
+    #  更新火花
+    for fire in fires.sprites():
+        #  更新火花的序列编号
+        fire.update_fire()
+        #  删除已消失的子弹
+        if fire.explode_index >= 7:
+            fires.remove(fire)
