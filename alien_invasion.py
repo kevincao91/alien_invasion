@@ -8,6 +8,7 @@ from button import Buttons
 from scoreboard import Scoreboards
 from background import BackGrounds
 from mousecursor import MouseCursors
+import os
 
 
 def run_game():
@@ -18,7 +19,7 @@ def run_game():
     pygame.init()
     pygame.mixer.init()
     #  加载背景音乐
-    pygame.mixer.music.load('audio/BGM.mp3')
+    pygame.mixer.music.load(os.path.relpath('audio/BGM.mp3'))
     pygame.mixer.music.play(-1, 0.0)
     pygame.time.delay(1000)  # 等待1秒让mixer完成初始化
     global_set = Settings()
@@ -27,8 +28,11 @@ def run_game():
     screen = pygame.display.set_mode((global_set.screen_width, global_set.screen_height), global_set.flags)
     #  设置标题
     pygame.display.set_caption(global_set.game_title)
-    #  创建背景图和鼠标图
+    #  创建背景图
     back_ground = BackGrounds(global_set, screen)
+    if global_set.full_screen:
+        back_ground.image = pygame.transform.scale(back_ground.image, (global_set.screen_width, global_set.screen_height))
+    #  创建鼠标图
     mouse_cursor = MouseCursors(global_set, screen)
     #  创建 Play 按钮
     play_button = Buttons(global_set, screen, "Play")
@@ -56,22 +60,19 @@ def run_game():
         #  监视键盘和鼠标事件
         gf.check_events(global_set, screen, stats, score_board, play_button, ship, aliens, bullets, mouse_cursor)
 
-        if stats.game_active:
-            #  事物更新
+        if stats.game_state:
+            #  游戏事物更新控制
+            gf.game_state_control(global_set, stats, screen, score_board, ship, aliens, bullets)
             #  能否移动飞船
             if not stats.ship_freeze_flag:
                 ship.update()
-            else:
-                gf.check_sound(global_set, stats)
             #  能否移动外星人和子弹
             if not stats.aliens_bullet_freeze_flag:
-                gf.update_aliens(global_set, stats, screen, score_board, ship, aliens, bullets)
+                gf.update_aliens(global_set, stats, screen, score_board, ship, aliens)
                 gf.update_bullets(global_set, stats, screen, score_board, ship, aliens, bullets, fires)
-            else:
-                gf.check_sound(global_set, stats)
             #  更新火花
-            gf.update_fires(fires)
-
+            if fires:
+                gf.update_fires(fires)
         #  每次循环时都重绘屏幕
         gf.update_screen(back_ground, mouse_cursor, stats, screen, score_board, ship, aliens, bullets, play_button, fires)
         # ticks + 1

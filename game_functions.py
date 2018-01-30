@@ -53,6 +53,55 @@ def play_read_go(global_set):
     global_set.begin_audio_channel = global_set.begin_audio.play()
 
 
+def check_sound(global_set, stats):
+    if stats.game_state in [1, 11]:
+        if not global_set.begin_audio_channel.get_busy():
+            stats.game_state = 2
+    if stats.game_state == 3:
+        if not global_set.ship_hit_audio_channel.get_busy():
+            stats.game_state = 4
+
+
+def game_state_control(global_set, stats, screen, score_board, ship, aliens, bullets):
+    #  game_state值      游戏状态    飞船状态    外星人状态   子弹状态    对应阶段
+    #  0                非激活状态   不可移动    不移动       不能产生  游戏未开始，等待开始阶段
+    #  1                激活状态     不可移动    不移动       不能产生  准备开始，播放开始声音阶段
+    #  11               激活状态     可移动      不移动       不能产生  新一级准备开始，播放开始声音阶段
+    #  2                激活状态      可移动      移动         能产生   正常游戏阶段
+    #  3                激活状态     不可移动    不移动       不能产生     坠机，播放坠机声音阶段
+    #  4                激活状态     不可移动    不移动       不能产生   判断游戏是否继续阶段
+
+    if stats.game_state == 0:
+        stats.aliens_bullet_freeze_flag = True
+        stats.ship_freeze_flag = True
+        stats.game_active = False
+    elif stats.game_state == 1:
+        stats.game_active = True
+        stats.aliens_bullet_freeze_flag = True
+        stats.ship_freeze_flag = True
+        check_sound(global_set, stats)
+    elif stats.game_state == 11:
+        stats.game_active = True
+        stats.aliens_bullet_freeze_flag = True
+        stats.ship_freeze_flag = False
+        check_sound(global_set, stats)
+    elif stats.game_state == 2:
+        stats.game_active = True
+        stats.aliens_bullet_freeze_flag = False
+        stats.ship_freeze_flag = False
+    elif stats.game_state == 3:
+        stats.game_active = True
+        stats.aliens_bullet_freeze_flag = True
+        stats.ship_freeze_flag = True
+        check_sound(global_set, stats)
+    elif stats.game_state == 4:
+        stats.game_active = True
+        stats.aliens_bullet_freeze_flag = True
+        stats.ship_freeze_flag = True
+        #  判断下一步处理
+        level_again_or_start_new_level(global_set, stats, screen, score_board, ship, aliens, bullets)
+
+
 def initialize_and_start_game(global_set, screen, stats, score_board, aliens, ship, bullets):
     #  重置游戏设置
     global_set.initialize_dynamic_settings()
@@ -63,6 +112,12 @@ def initialize_and_start_game(global_set, screen, stats, score_board, aliens, sh
     stats.game_active = True
     #  重置记分牌图像
     score_board.prep_images()
+    #  开始游戏
+    start_game(global_set, screen, stats, score_board, aliens, ship, bullets)
+
+
+def start_game(global_set, screen, stats, score_board, aliens, ship, bullets):
+    #  开始游戏
     #  清空外星人列表和子弹列表
     aliens.empty()
     bullets.empty()
@@ -71,12 +126,13 @@ def initialize_and_start_game(global_set, screen, stats, score_board, aliens, sh
     ship.center_ship()
     #  播放开始音效
     play_read_go(global_set)
-    stats.sleep_after_flag = True
+    #  更新游戏状态信息   等待开始声音结束
+    stats.game_state = 1
 
 
 def check_enter_button(global_set, screen, stats, score_board, ship, aliens, bullets):
     #  在玩家单击Enter按钮时等价于点击play button
-    if not stats.game_active:
+    if not stats.game_state:
         # 初始化并开始游戏
         initialize_and_start_game(global_set, screen, stats, score_board, aliens, ship, bullets)
 
@@ -84,7 +140,7 @@ def check_enter_button(global_set, screen, stats, score_board, ship, aliens, bul
 def check_play_button(global_set, screen, stats, score_board, play_button, ship, aliens, bullets, mouse_x, mouse_y):
     #  在玩家单击 Play 按钮时开始新游戏
     if play_button.rect.collidepoint(mouse_x, mouse_y):
-        if not stats.game_active:
+        if not stats.game_state:
             # 初始化并开始游戏
             initialize_and_start_game(global_set, screen, stats, score_board, aliens, ship, bullets)
 
@@ -129,16 +185,10 @@ def update_screen(back_ground, mouse_cursor, stats, screen, score_board, ship, a
     #  6、显示得分
     score_board.show_score()
     #  7、如果游戏处于非活动状态，就绘制 Play 按钮
-    if not stats.game_active:
+    if not stats.game_state:
         play_button.draw_button()
         mouse_cursor.blitme()
     #  让最近绘制的屏幕可见
-    '''
-    if stats.sleep_before_flag:
-        #  暂停
-        sleep(0.5)
-        stats.sleep_before_flag = False
-    '''
     pygame.display.flip()
     #  pygame.display.update()
 
@@ -148,14 +198,6 @@ def check_high_score(stats, score_board):
     if stats.score > stats.high_score:
         stats.high_score = stats.score
         score_board.prep_high_score()
-
-
-def check_sound(global_set, stats):  # 写这个函数
-    #
-    if not global_set.begin_audio_channel.get_busy():
-        stats.aliens_bullet_freeze_flag = False
-    if not global_set.ship_hit_audio_channel.get_busy():
-        stats.ship_freeze_flag = False
 
 
 def sound_aliens(stats):
@@ -202,9 +244,7 @@ def start_new_level(global_set, screen, stats, score_board, ship, aliens, bullet
     #  更新等级信息
     score_board.prep_level()
     #  更新游戏状态
-    stats.aliens_bullet_freeze_flag = True
-    stats.sleep_after_flag = True
-    stats.sleep_before_flag = True
+    stats.game_state = 11
     #  播放开始音效
     play_read_go(global_set)
 
@@ -281,52 +321,60 @@ def change_fleet_direction(global_set, aliens):
     global_set.fleet_direction *= -1
 
 
-def ship_hit(global_set, stats, screen, score_board, ship, aliens, bullets):
+def ship_hit(global_set, stats, score_board):
     #  响应被外星人撞到的飞船
     #  将 ships_left 减 1
     stats.ships_left -= 1
-    #  更新状态信息
-    stats.sleep_before_flag = True
-    stats.ship_freeze_flag = True
+    #  更新游戏状态信息  坠机阶段
+    stats.game_state = 3
+    # 更新记分牌
+    score_board.prep_ships()
     #  播放撞击声
     global_set.ship_hit_audio_channel = global_set.ship_hit_audio.play()
     global_set.ship_hit_audio.play()
-    # 更新记分牌
-    score_board.prep_ships()
+
+
+def level_again_or_start_new_level(global_set, stats, screen, score_board, ship, aliens, bullets):
     #  处理子弹和飞船
     if stats.ships_left > 0:
-        #  清空外星人列表和子弹列表
-        aliens.empty()
-        bullets.empty()
-        #  创建一群新的外星人，并将飞船放到屏幕底端中央
-        create_fleet(global_set, screen, stats, score_board, ship, aliens)
-        ship.center_ship()
+        #  重开此level
+        start_game(global_set, screen, stats, score_board, aliens, ship, bullets)
     else:
-        stats.game_active = False
-        # 光标可见
-        pygame.mouse.set_visible(True)
+        game_over(stats)
 
 
-def check_aliens_bottom(global_set, stats, screen, score_board, ship, aliens, bullets):
+def game_over(stats):
+    #  更新游戏状态信息  坠机阶段
+    stats.game_state = 0
+    # 光标可见
+    pygame.mouse.set_visible(True)
+
+
+def check_aliens_bottom(screen, aliens):
+    lose_ship_flag = False
     #  检查是否有外星人到达了屏幕底端
     screen_rect = screen.get_rect()
     for alien in aliens.sprites():
         if alien.rect.bottom >= screen_rect.bottom:
-            #  像飞船被撞到一样进行处理
-            ship_hit(global_set, stats, screen, score_board, ship, aliens, bullets)
+            #  标记为真
+            lose_ship_flag = True
             break
+    return lose_ship_flag
 
 
-def update_aliens(global_set, stats, screen, score_board, ship, aliens, bullets):
+def update_aliens(global_set, stats, screen, score_board, ship, aliens):
     #  更新外星人群中所有外星人的位置
     #  检查是否有外星人位于屏幕边缘，并更新整群外星人的位置
     check_fleet_edges(global_set, aliens)
     aliens.update()
+    lose_ship_flag = False
     #  检测外星人和飞船之间的碰撞
     if pygame.sprite.spritecollideany(ship, aliens):
-        ship_hit(global_set, stats, screen, score_board, ship, aliens, bullets)
+        lose_ship_flag = True
     #  检查是否有外星人到达屏幕底端
-    check_aliens_bottom(global_set, stats, screen, score_board, ship, aliens, bullets)
+    lose_ship_flag = check_aliens_bottom(screen, aliens)
+    if lose_ship_flag:
+        ship_hit(global_set, stats, score_board)
 
 
 def update_fires(fires):
@@ -337,5 +385,3 @@ def update_fires(fires):
         #  删除已消失的子弹
         if fire.explode_index >= 7:
             fires.remove(fire)
-
-

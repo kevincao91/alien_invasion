@@ -31,40 +31,36 @@ class Settings():
         self.ship_hit_audio_file = 'audio/explo.wav'
         self.ship_hit_audio = pygame.mixer.Sound(self.ship_hit_audio_file)
         self.ship_hit_audio_channel = pygame.mixer.Channel(2)
+        #  游戏可玩性参数初始化
         #  飞船设置
-        self.ship_speed_factor = 0.7  # 后面有再初始化设置
+        self.ship_speed_factor = 0
         self.ship_limit = 3
-
         #  子弹设置
-        self.bullet_speed_factor = 0.7  # 后面有再初始化设置
+        self.bullet_speed_factor = 1
         self.bullet_width = 10
         self.bullet_height = 15
         self.bullet_color = 255, 60, 60
         self.bullets_allowed = 20
-
         #  外星人设置
+        self.alien_speed_factor = 0
+        self.fleet_drop_speed = 0
+        self.fleet_direction = 1
+        self.alien_points = 0
+        #  外星人填充程度设置
         self.alien_high_fill_factor = 0.6
-        self.alien_speed_factor = 0.5  # 后面有再初始化设置
-        self.fleet_drop_speed = 5
-        # fleet_direction 为 1 表示向右移，为 -1 表示向左移
-        self.fleet_direction = 1  # 后面有再初始化设置
-
-        # 初始击落外星人得分
-        self.alien_points = 5     # 后面有再初始化设置
-
         # 外星人点数的提高速度
         self.score_scale = 1.2
         #  加快游戏节奏参数
         self.ship_speedup_scale = 1.2
         self.bullet_speedup_scale = 1.05
         self.alien_speedup_scale = 1.2
-        self.initialize_dynamic_settings()
 
     def initialize_dynamic_settings(self):
         #  初始化随游戏进行而变化的设置
-        self.ship_speed_factor = 0.7
-        self.bullet_speed_factor = 0.7
-        self.alien_speed_factor = 0.5
+        self.ship_speed_factor = 1
+        self.bullet_speed_factor = 1
+        self.alien_speed_factor = 0.7
+        self.fleet_drop_speed = 10
         # fleet_direction为1表示向右；为-1表示向左
         self.fleet_direction = 1
         self.alien_points = 5
@@ -74,5 +70,6 @@ class Settings():
         self.ship_speed_factor *= self.ship_speedup_scale
         self.bullet_speed_factor *= self.bullet_speedup_scale
         self.alien_speed_factor *= self.alien_speedup_scale
+        self.fleet_drop_speed *= self.alien_speedup_scale
         self.alien_points = int(self.alien_points * self.score_scale)
 
