@@ -51,7 +51,7 @@ def run_game():
     #  创建一个用于储存火花的编组
     fires = Group()
     #  创建外星人群
-    gf.create_fleet(global_set, screen, stats, score_board, ship, aliens, bosses)
+    gf.create_fleet(global_set, screen, stats, score_board, ship, aliens)
     #  开始游戏的主循环
     while True:
         #  控制游戏最大帧率归零
@@ -64,14 +64,17 @@ def run_game():
 
         if stats.game_state:
             #  游戏事物更新控制
-            gf.game_state_control(global_set, stats, screen, score_board, ship, aliens, bullets)
+            gf.game_state_control(global_set, stats, screen, score_board, ship, aliens, bullets, bosses)
             #  能否移动飞船
             if not stats.ship_freeze_flag:
                 ship.update()
             #  能否移动外星人和子弹
             if not stats.aliens_bullet_freeze_flag:
-                gf.update_aliens(global_set, stats, screen, score_board, ship, aliens)
-                gf.update_bullets(global_set, stats, screen, score_board, ship, aliens, bullets, fires)
+                if stats.is_boss:
+                    gf.update_bosses(global_set, stats, score_board, ship, bosses)
+                else:
+                    gf.update_aliens(global_set, stats, screen, score_board, ship, aliens)
+                gf.update_bullets(global_set, stats, screen, score_board, ship, aliens, bullets, fires, bosses)
             #  更新火花
             if fires:
                 gf.update_fires(fires)

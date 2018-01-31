@@ -6,6 +6,8 @@ import json
 from alien_boss import AlienBosses
 
 
+#  ===========================================响应键盘鼠标事件==========================================================
+
 def check_full_screen(global_set):
     global_set.window_width = pygame.display.Info().current_w
     global_set.window_height = pygame.display.Info().current_h
@@ -50,87 +52,6 @@ def check_keyup_events(event, ship):
         ship.moving_left = False
 
 
-def play_read_go(global_set):
-    global_set.begin_audio_channel = global_set.begin_audio.play()
-
-
-def check_sound(global_set, stats):
-    if stats.game_state in [1, 11]:
-        if not global_set.begin_audio_channel.get_busy():
-            stats.game_state = 2
-    if stats.game_state == 3:
-        if not global_set.ship_hit_audio_channel.get_busy():
-            stats.game_state = 4
-
-
-def game_state_control(global_set, stats, screen, score_board, ship, aliens, bullets):
-    #  game_state值      游戏状态    飞船状态    外星人状态   子弹状态    对应阶段
-    #  0                非激活状态   不可移动    不移动       不能产生  游戏未开始，等待开始阶段
-    #  1                激活状态     不可移动    不移动       不能产生  准备开始，播放开始声音阶段
-    #  11               激活状态     可移动      不移动       不能产生  新一级准备开始，播放开始声音阶段
-    #  2                激活状态      可移动      移动         能产生   正常游戏阶段
-    #  3                激活状态     不可移动    不移动       不能产生     坠机，播放坠机声音阶段
-    #  4                激活状态     不可移动    不移动       不能产生   判断游戏是否继续阶段
-
-    if stats.game_state == 0:
-        stats.aliens_bullet_freeze_flag = True
-        stats.ship_freeze_flag = True
-        stats.game_active = False
-    elif stats.game_state == 1:
-        stats.game_active = True
-        stats.aliens_bullet_freeze_flag = True
-        stats.ship_freeze_flag = True
-        check_sound(global_set, stats)
-    elif stats.game_state == 11:
-        stats.game_active = True
-        stats.aliens_bullet_freeze_flag = True
-        stats.ship_freeze_flag = False
-        check_sound(global_set, stats)
-    elif stats.game_state == 2:
-        stats.game_active = True
-        stats.aliens_bullet_freeze_flag = False
-        stats.ship_freeze_flag = False
-    elif stats.game_state == 3:
-        stats.game_active = True
-        stats.aliens_bullet_freeze_flag = True
-        stats.ship_freeze_flag = True
-        check_sound(global_set, stats)
-    elif stats.game_state == 4:
-        stats.game_active = True
-        stats.aliens_bullet_freeze_flag = True
-        stats.ship_freeze_flag = True
-        #  判断下一步处理
-        level_again_or_start_new_level(global_set, stats, screen, score_board, ship, aliens, bullets)
-
-
-def initialize_and_start_game(global_set, screen, stats, score_board, aliens, ship, bullets, bosses):
-    #  重置游戏设置
-    global_set.initialize_dynamic_settings()
-    #  隐藏光标
-    pygame.mouse.set_visible(False)
-    #  重置游戏统计信息
-    stats.reset_stats()
-    stats.game_active = True
-    #  重置记分牌图像
-    score_board.prep_images()
-    #  开始游戏
-    start_game(global_set, screen, stats, score_board, aliens, ship, bullets, bosses)
-
-
-def start_game(global_set, screen, stats, score_board, aliens, ship, bullets, bosses):
-    #  开始游戏
-    #  清空外星人列表和子弹列表
-    aliens.empty()
-    bullets.empty()
-    #  创建一群新的外星人，并让飞船居中
-    create_fleet(global_set, screen, stats, score_board, ship, aliens, bosses)
-    ship.center_ship()
-    #  播放开始音效
-    play_read_go(global_set)
-    #  更新游戏状态信息   等待开始声音结束
-    stats.game_state = 1
-
-
 def check_enter_button(global_set, screen, stats, score_board, ship, aliens, bullets, bosses):
     #  在玩家单击Enter按钮时等价于点击play button
     if not stats.game_state:
@@ -138,7 +59,8 @@ def check_enter_button(global_set, screen, stats, score_board, ship, aliens, bul
         initialize_and_start_game(global_set, screen, stats, score_board, aliens, ship, bullets, bosses)
 
 
-def check_play_button(global_set, screen, stats, score_board, play_button, ship, aliens, bullets, mouse_x, mouse_y, bosses):
+def check_play_button(global_set, screen, stats, score_board, play_button, ship, aliens, bullets, mouse_x, mouse_y,
+                      bosses):
     #  在玩家单击 Play 按钮时开始新游戏
     if play_button.rect.collidepoint(mouse_x, mouse_y):
         if not stats.game_state:
@@ -164,7 +86,135 @@ def check_events(global_set, screen, stats, score_board, play_button, ship, alie
             mouse_cursor.update(mouse_x, mouse_y)
 
 
-def update_screen(back_ground, mouse_cursor, stats, screen, score_board, ship, aliens, bullets, play_button, fires, bosses):
+#  =====================================================================================================================
+
+def play_read_go(global_set):
+    global_set.begin_audio_channel = global_set.begin_audio.play()
+
+
+def check_sound(global_set, stats):
+    if stats.game_state in [10, 11, 12, 13]:
+        if not global_set.begin_audio_channel.get_busy():
+            if stats.game_state % 2 == 0:
+                stats.game_state = 21
+            else:
+                stats.game_state = 20
+    if stats.game_state in [30, 31]:
+        if not global_set.ship_hit_audio_channel.get_busy():
+            if stats.game_state % 2 == 0:
+                stats.game_state = 41
+            else:
+                stats.game_state = 40
+
+
+def game_state_control(global_set, stats, screen, score_board, ship, aliens, bullets, bosses):
+    #  game_state值      游戏状态    飞船状态    外星人状态   子弹状态    对应阶段
+    #  0                非激活状态   不可移动    不移动       不能产生  游戏未开始，等待开始阶段
+    #  10               激活状态     不可移动    不移动       不能产生  准备开始，播放开始声音阶段
+    #  12               激活状态     可移动      不移动       不能产生  新一级准备开始，播放开始声音阶段
+    #  11               激活状态     不可移动    不移动       不能产生  boss准备开始，播放开始声音阶段
+    #  13               激活状态     可移动      不移动       不能产生  boss新一级准备开始，播放开始声音阶段
+    #  20               激活状态      可移动      移动         能产生   正常游戏阶段
+    #  21               激活状态      可移动      移动         能产生   boss正常游戏阶段
+    #  30               激活状态     不可移动    不移动       不能产生   坠机，播放坠机声音阶段
+    #  31               激活状态     不可移动    不移动       不能产生   boss坠机，播放坠机声音阶段
+    #  40               激活状态     不可移动    不移动       不能产生   判断游戏是否继续阶段
+    #  41               激活状态     不可移动    不移动       不能产生   boss判断游戏是否继续阶段
+
+    if stats.game_state == 0:
+        stats.aliens_bullet_freeze_flag = True
+        stats.ship_freeze_flag = True
+        stats.game_active = False
+    elif stats.game_state == 10:
+        stats.game_active = True
+        stats.aliens_bullet_freeze_flag = True
+        stats.ship_freeze_flag = True
+        check_sound(global_set, stats)
+    elif stats.game_state == 11:
+        stats.game_active = True
+        stats.aliens_bullet_freeze_flag = True
+        stats.ship_freeze_flag = True
+        check_sound(global_set, stats)
+    elif stats.game_state == 12:
+        stats.game_active = True
+        stats.aliens_bullet_freeze_flag = True
+        stats.ship_freeze_flag = False
+        check_sound(global_set, stats)
+    elif stats.game_state == 13:
+        stats.game_active = True
+        stats.aliens_bullet_freeze_flag = True
+        stats.ship_freeze_flag = False
+        check_sound(global_set, stats)
+    elif stats.game_state == 20:
+        stats.game_active = True
+        stats.aliens_bullet_freeze_flag = False
+        stats.ship_freeze_flag = False
+    elif stats.game_state == 21:
+        stats.game_active = True
+        stats.aliens_bullet_freeze_flag = False
+        stats.ship_freeze_flag = False
+    elif stats.game_state == 30:
+        stats.game_active = True
+        stats.aliens_bullet_freeze_flag = True
+        stats.ship_freeze_flag = True
+        check_sound(global_set, stats)
+    elif stats.game_state == 31:
+        stats.game_active = True
+        stats.aliens_bullet_freeze_flag = True
+        stats.ship_freeze_flag = True
+        check_sound(global_set, stats)
+    elif stats.game_state == 40:
+        stats.game_active = True
+        stats.aliens_bullet_freeze_flag = True
+        stats.ship_freeze_flag = True
+        #  判断下一步处理
+        level_again_or_start_new_level(global_set, stats, screen, score_board, ship, aliens, bullets, bosses)
+    elif stats.game_state == 41:
+        stats.game_active = True
+        stats.aliens_bullet_freeze_flag = True
+        stats.ship_freeze_flag = True
+        #  判断下一步处理
+        level_again_or_start_new_level(global_set, stats, screen, score_board, ship, aliens, bullets, bosses)
+
+
+def initialize_and_start_game(global_set, screen, stats, score_board, aliens, ship, bullets, bosses):
+    #  重置游戏设置
+    global_set.initialize_dynamic_settings()
+    #  隐藏光标
+    pygame.mouse.set_visible(False)
+    #  重置游戏统计信息
+    stats.reset_stats()
+    stats.game_active = True
+    #  重置记分牌图像
+    score_board.prep_images()
+    #  开始游戏
+    start_game(global_set, screen, stats, score_board, aliens, ship, bullets, bosses)
+
+
+def start_game(global_set, screen, stats, score_board, aliens, ship, bullets, bosses):
+    #  开始游戏
+    #  清空外星人列表和子弹列表
+    bullets.empty()
+    if stats.game_state % 2:
+        bosses.empty()
+        #  创建一群新的外星人，并让飞船居中
+        create_boss(global_set, screen, bosses)
+        #  更新游戏状态信息   等待开始声音结束
+        stats.game_state = 11
+    else:
+        aliens.empty()
+        #  创建一群新的外星人
+        create_fleet(global_set, screen, stats, score_board, ship, aliens)
+        #  更新游戏状态信息   等待开始声音结束
+        stats.game_state = 10
+    #  让飞船居中
+    ship.center_ship()
+    #  播放开始音效
+    play_read_go(global_set)
+
+
+def update_screen(back_ground, mouse_cursor, stats, screen, score_board, ship, aliens, bullets, play_button, fires,
+                  bosses):
     #  更新屏幕上的图像，并切换到新屏幕
     #  每次循环时都重绘屏幕
     #  1、最底层  背景色
@@ -217,7 +267,7 @@ def create_fire(collisions, bullets, fires):
     fires.add(collisions)
 
 
-def check_bullet_alien_collisions(global_set, stats, screen, score_board, ship, aliens, bullets, fires):
+def check_bullet_alien_collisions(global_set, stats, screen, score_board, ship, aliens, bullets, fires, bosses):
     #  响应子弹和外星人的碰撞
     #  删除发生碰撞的子弹和外星人
     collisions = pygame.sprite.groupcollide(bullets, aliens, True, True)
@@ -235,32 +285,83 @@ def check_bullet_alien_collisions(global_set, stats, screen, score_board, ship, 
     #  检测游戏结束
     if len(aliens) == 0:
         if len(fires) == 0:
-            start_new_level(global_set, screen, stats, score_board, ship, aliens, bullets)
+            start_new_level(global_set, screen, stats, score_board, ship, aliens, bullets, bosses)
 
 
-def start_new_level(global_set, screen, stats, score_board, ship, aliens, bullets):
+def check_bullet_boss_collisions(global_set, stats, screen, score_board, ship, aliens, bullets, fires, bosses):
+    #  响应子弹和外星人boss的碰撞
+    #  删除发生碰撞的子弹
+    collisions = pygame.sprite.groupcollide(bullets, bosses, True, False)
+    if collisions:
+        # 计算碰撞字典中碰撞个数并计算得分
+        for liens in collisions.values():
+            stats.score += global_set.alien_points * len(liens)
+            if len(liens):
+                sound_aliens(stats)
+                for boss in bosses:
+                    print(boss.HP)
+                    boss.HP -= 1
+        #  创建火花状态
+        create_fire(collisions, bullets, fires)
+        #  更新计分牌
+        score_board.prep_score()
+        check_high_score(stats, score_board)
+    #  检测游戏结束
+    for boss in bosses:
+        if boss.HP <= 0:
+            if len(fires) == 0:
+                bosses.empty()
+                start_new_level(global_set, screen, stats, score_board, ship, aliens, bullets, bosses)
+
+
+def create_boss(global_set, screen, bosses):
+    #  创建一个外星人boos
+    alien_boss = AlienBosses(global_set, screen)
+    #  初始随机位置
+    alien_boss.initial_position()
+    bosses.add(alien_boss)
+
+
+def check_is_boss_level(stats):
+    if stats.level % 3:
+        #  更新游戏状态
+        stats.is_boss = False
+        stats.game_state = 12  # 小怪
+        return False
+    else:
+        #  更新游戏状态
+        stats.is_boss = True
+        stats.game_state = 13  # Boss
+        return True
+
+
+def start_new_level(global_set, screen, stats, score_board, ship, aliens, bullets, bosses):
     # 提高等级
     stats.level += 1
-    #  删除现有的所有子弹，并创建一个新的外星人群
+    #  删除现有的所有子弹
     bullets.empty()
-    global_set.increase_speed()
-    create_fleet(global_set, screen, stats, score_board, ship, aliens)
+    if check_is_boss_level(stats):
+        create_boss(global_set, screen, bosses)
+    else:
+        global_set.increase_speed()
+        create_fleet(global_set, screen, stats, score_board, ship, aliens)
     #  更新等级信息
     score_board.prep_level()
-    #  更新游戏状态
-    stats.game_state = 11
     #  播放开始音效
     play_read_go(global_set)
 
 
-def update_bullets(global_set, stats, screen, score_board, ship, aliens, bullets, fires):
+def update_bullets(global_set, stats, screen, score_board, ship, aliens, bullets, fires, bosses):
     #  更新子弹的位置
     bullets.update()
     #  删除已消失的子弹
     for bullet in bullets.copy():
         if bullet.rect.bottom <= score_board.score_bar_height:
             bullets.remove(bullet)
-    check_bullet_alien_collisions(global_set, stats, screen, score_board, ship, aliens, bullets, fires)
+    if stats.is_boss:
+        check_bullet_boss_collisions(global_set, stats, screen, score_board, ship, aliens, bullets, fires, bosses)
+    else:
+        check_bullet_alien_collisions(global_set, stats, screen, score_board, ship, aliens, bullets, fires, bosses)
 
 
 def fire_bullet(global_set, screen, ship, bullets):
@@ -298,7 +399,7 @@ def create_alien(global_set, screen, stats, score_board, aliens, alien_number, r
     aliens.add(alien)
 
 
-def create_fleet(global_set, screen, stats, score_board, ship, aliens, bosses):
+def create_fleet(global_set, screen, stats, score_board, ship, aliens):
     #  创建外星人群
     #  创建一个外星人，并计算每行可容纳多少个外星人
     alien = Aliens(global_set, screen, stats)
@@ -308,9 +409,6 @@ def create_fleet(global_set, screen, stats, score_board, ship, aliens, bosses):
     for row_number in range(number_rows):
         for alien_number in range(number_aliens_x):
             create_alien(global_set, screen, stats, score_board, aliens, alien_number, row_number)
-
-    #   测试boss
-    create_bosses(global_set, screen, stats, score_board, bosses, 1)
 
 
 def check_fleet_edges(global_set, aliens):
@@ -333,7 +431,10 @@ def ship_hit(global_set, stats, score_board):
     #  将 ships_left 减 1
     stats.ships_left -= 1
     #  更新游戏状态信息  坠机阶段
-    stats.game_state = 3
+    if stats.game_state % 2:
+        stats.game_state = 31
+    else:
+        stats.game_state = 30
     # 更新记分牌
     score_board.prep_ships()
     #  播放撞击声
@@ -341,11 +442,11 @@ def ship_hit(global_set, stats, score_board):
     global_set.ship_hit_audio.play()
 
 
-def level_again_or_start_new_level(global_set, stats, screen, score_board, ship, aliens, bullets):
+def level_again_or_start_new_level(global_set, stats, screen, score_board, ship, aliens, bullets, bosses):
     #  处理子弹和飞船
     if stats.ships_left > 0:
         #  重开此level
-        start_game(global_set, screen, stats, score_board, aliens, ship, bullets)
+        start_game(global_set, screen, stats, score_board, aliens, ship, bullets, bosses)
     else:
         game_over(stats)
 
@@ -374,13 +475,22 @@ def update_aliens(global_set, stats, screen, score_board, ship, aliens):
     #  检查是否有外星人位于屏幕边缘，并更新整群外星人的位置
     check_fleet_edges(global_set, aliens)
     aliens.update()
-    lose_ship_flag = False
     #  检测外星人和飞船之间的碰撞
     if pygame.sprite.spritecollideany(ship, aliens):
         lose_ship_flag = True
-    #  检查是否有外星人到达屏幕底端
-    lose_ship_flag = check_aliens_bottom(screen, aliens)
+    else:
+        #  检查是否有外星人到达屏幕底端
+        lose_ship_flag = check_aliens_bottom(screen, aliens)
     if lose_ship_flag:
+        ship_hit(global_set, stats, score_board)
+
+
+def update_bosses(global_set, stats, score_board, ship, bosses):
+    #  更新外星人boss所有外星人boss的位置
+    for boss in bosses.sprites():
+        boss.update()
+    #  检测boss和飞船之间的碰撞
+    if pygame.sprite.spritecollideany(ship, bosses):
         ship_hit(global_set, stats, score_board)
 
 
@@ -392,14 +502,3 @@ def update_fires(fires):
         #  删除已消失的子弹
         if fire.explode_index >= 7:
             fires.remove(fire)
-
-
-def create_bosses(global_set, screen, stats, score_board, bosses, alien_number):
-    #  创建一个外星人boos并将其放在当前行
-    alien_boss = AlienBosses(global_set, screen, stats)
-    alien_width = alien_boss.rect.width
-    alien_boss.x = alien_width * 0.2 + alien_width * alien_number
-    alien_boss.rect.x = alien_boss.x
-    alien_boss.y = score_board.score_bar_height + alien_boss.rect.height * 0.2
-    alien_boss.rect.y = alien_boss.y
-    bosses.add(alien_boss)

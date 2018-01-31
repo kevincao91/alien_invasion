@@ -14,6 +14,8 @@ class Settings():
         self.flags = 0  # 全屏参数
         self.window_width = self.screen_width
         self.window_height = self.screen_height
+        #  标题栏高度
+        self.score_bar_height = 0
         #  标题设置
         self.game_title = "Alien Invasion"
         #  游戏信息存储文件路径设置

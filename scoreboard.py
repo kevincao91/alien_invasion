@@ -29,6 +29,7 @@ class Scoreboards():
         self.high_test_image = self.font.render("Test_Height", True, self.text_color, self.global_set.bg_color)
         self.high_test_rect = self.high_test_image.get_rect()
         self.score_bar_height = self.high_test_rect.height * 1.5
+        self.global_set.score_bar_height = self.score_bar_height
 
     def prep_images(self):
         self.prep_score()

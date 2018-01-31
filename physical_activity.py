@@ -64,14 +64,6 @@ def update_bosses(bosses):
         boss.update()
 
 
-def check_boss_edges(global_set, bosses):            #  写他
-    #  有外星人到达边缘时采取相应的措施
-    for boss in bosses.sprites():
-        if boss.check_edges():
-            change_fleet_direction(global_set, boss)
-            break
-
-
 def test():
     #  pygame初始化
     pygame.init()
