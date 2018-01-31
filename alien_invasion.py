@@ -46,10 +46,12 @@ def run_game():
     bullets = Group()
     #  创建一个用于储存外星人的编组
     aliens = Group()
+    #  创建一个用于储存外星人boos的编组
+    bosses = Group()
     #  创建一个用于储存火花的编组
     fires = Group()
     #  创建外星人群
-    gf.create_fleet(global_set, screen, stats, score_board, ship, aliens)
+    gf.create_fleet(global_set, screen, stats, score_board, ship, aliens, bosses)
     #  开始游戏的主循环
     while True:
         #  控制游戏最大帧率归零
@@ -58,7 +60,7 @@ def run_game():
         if global_set.ticks >= global_set.ANIMATE_CYCLE:
             global_set.ticks = 0
         #  监视键盘和鼠标事件
-        gf.check_events(global_set, screen, stats, score_board, play_button, ship, aliens, bullets, mouse_cursor)
+        gf.check_events(global_set, screen, stats, score_board, play_button, ship, aliens, bullets, mouse_cursor, bosses)
 
         if stats.game_state:
             #  游戏事物更新控制
@@ -74,7 +76,8 @@ def run_game():
             if fires:
                 gf.update_fires(fires)
         #  每次循环时都重绘屏幕
-        gf.update_screen(back_ground, mouse_cursor, stats, screen, score_board, ship, aliens, bullets, play_button, fires)
+        gf.update_screen(back_ground, mouse_cursor, stats, screen, score_board, ship, aliens, bullets, play_button,
+                         fires, bosses)
         # ticks + 1
         global_set.ticks += 1
 

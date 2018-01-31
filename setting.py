@@ -50,6 +50,7 @@ class Settings():
         self.alien_high_fill_factor = 0.6
         # 外星人点数的提高速度
         self.score_scale = 1.2
+
         #  加快游戏节奏参数
         self.ship_speedup_scale = 1.2
         self.bullet_speedup_scale = 1.05

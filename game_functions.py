@@ -3,6 +3,7 @@ import pygame
 from bullet import Bullet
 from alien import Aliens
 import json
+from alien_boss import AlienBosses
 
 
 def check_full_screen(global_set):
@@ -17,14 +18,14 @@ def check_full_screen(global_set):
         global_set.flags = 0
 
 
-def check_keydown_events(event, stats, screen, global_set, score_board, ship, aliens, bullets):
+def check_keydown_events(event, stats, screen, global_set, score_board, ship, aliens, bullets, bosses):
     # 响应按键
     if event.key == pygame.K_q:
         quit_game(stats, global_set)
     elif event.key == pygame.K_ESCAPE:
         quit_game(stats, global_set)
     elif event.key == pygame.K_RETURN:
-        check_enter_button(global_set, screen, stats, score_board, ship, aliens, bullets)
+        check_enter_button(global_set, screen, stats, score_board, ship, aliens, bullets, bosses)
     elif stats.game_active:
         if event.key == pygame.K_RIGHT:
             ship.moving_right = True
@@ -102,7 +103,7 @@ def game_state_control(global_set, stats, screen, score_board, ship, aliens, bul
         level_again_or_start_new_level(global_set, stats, screen, score_board, ship, aliens, bullets)
 
 
-def initialize_and_start_game(global_set, screen, stats, score_board, aliens, ship, bullets):
+def initialize_and_start_game(global_set, screen, stats, score_board, aliens, ship, bullets, bosses):
     #  重置游戏设置
     global_set.initialize_dynamic_settings()
     #  隐藏光标
@@ -113,16 +114,16 @@ def initialize_and_start_game(global_set, screen, stats, score_board, aliens, sh
     #  重置记分牌图像
     score_board.prep_images()
     #  开始游戏
-    start_game(global_set, screen, stats, score_board, aliens, ship, bullets)
+    start_game(global_set, screen, stats, score_board, aliens, ship, bullets, bosses)
 
 
-def start_game(global_set, screen, stats, score_board, aliens, ship, bullets):
+def start_game(global_set, screen, stats, score_board, aliens, ship, bullets, bosses):
     #  开始游戏
     #  清空外星人列表和子弹列表
     aliens.empty()
     bullets.empty()
     #  创建一群新的外星人，并让飞船居中
-    create_fleet(global_set, screen, stats, score_board, ship, aliens)
+    create_fleet(global_set, screen, stats, score_board, ship, aliens, bosses)
     ship.center_ship()
     #  播放开始音效
     play_read_go(global_set)
@@ -130,40 +131,40 @@ def start_game(global_set, screen, stats, score_board, aliens, ship, bullets):
     stats.game_state = 1
 
 
-def check_enter_button(global_set, screen, stats, score_board, ship, aliens, bullets):
+def check_enter_button(global_set, screen, stats, score_board, ship, aliens, bullets, bosses):
     #  在玩家单击Enter按钮时等价于点击play button
     if not stats.game_state:
         # 初始化并开始游戏
-        initialize_and_start_game(global_set, screen, stats, score_board, aliens, ship, bullets)
+        initialize_and_start_game(global_set, screen, stats, score_board, aliens, ship, bullets, bosses)
 
 
-def check_play_button(global_set, screen, stats, score_board, play_button, ship, aliens, bullets, mouse_x, mouse_y):
+def check_play_button(global_set, screen, stats, score_board, play_button, ship, aliens, bullets, mouse_x, mouse_y, bosses):
     #  在玩家单击 Play 按钮时开始新游戏
     if play_button.rect.collidepoint(mouse_x, mouse_y):
         if not stats.game_state:
             # 初始化并开始游戏
-            initialize_and_start_game(global_set, screen, stats, score_board, aliens, ship, bullets)
+            initialize_and_start_game(global_set, screen, stats, score_board, aliens, ship, bullets, bosses)
 
 
-def check_events(global_set, screen, stats, score_board, play_button, ship, aliens, bullets, mouse_cursor):
+def check_events(global_set, screen, stats, score_board, play_button, ship, aliens, bullets, mouse_cursor, bosses):
     #  响应按键和鼠标事件
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
         elif event.type == pygame.KEYDOWN:
-            check_keydown_events(event, stats, screen, global_set, score_board, ship, aliens, bullets)
+            check_keydown_events(event, stats, screen, global_set, score_board, ship, aliens, bullets, bosses)
         elif event.type == pygame.KEYUP:
             check_keyup_events(event, ship)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = pygame.mouse.get_pos()
             check_play_button(global_set, screen, stats, score_board, play_button, ship, aliens, bullets, mouse_x,
-                              mouse_y)
+                              mouse_y, bosses)
         elif event.type == pygame.MOUSEMOTION:
             mouse_x, mouse_y = pygame.mouse.get_pos()
             mouse_cursor.update(mouse_x, mouse_y)
 
 
-def update_screen(back_ground, mouse_cursor, stats, screen, score_board, ship, aliens, bullets, play_button, fires):
+def update_screen(back_ground, mouse_cursor, stats, screen, score_board, ship, aliens, bullets, play_button, fires, bosses):
     #  更新屏幕上的图像，并切换到新屏幕
     #  每次循环时都重绘屏幕
     #  1、最底层  背景色
@@ -188,6 +189,9 @@ def update_screen(back_ground, mouse_cursor, stats, screen, score_board, ship, a
     if not stats.game_state:
         play_button.draw_button()
         mouse_cursor.blitme()
+    #  测试boss
+    for boss in bosses.sprites():
+        boss.blitme()
     #  让最近绘制的屏幕可见
     pygame.display.flip()
     #  pygame.display.update()
@@ -294,7 +298,7 @@ def create_alien(global_set, screen, stats, score_board, aliens, alien_number, r
     aliens.add(alien)
 
 
-def create_fleet(global_set, screen, stats, score_board, ship, aliens):
+def create_fleet(global_set, screen, stats, score_board, ship, aliens, bosses):
     #  创建外星人群
     #  创建一个外星人，并计算每行可容纳多少个外星人
     alien = Aliens(global_set, screen, stats)
@@ -304,6 +308,9 @@ def create_fleet(global_set, screen, stats, score_board, ship, aliens):
     for row_number in range(number_rows):
         for alien_number in range(number_aliens_x):
             create_alien(global_set, screen, stats, score_board, aliens, alien_number, row_number)
+
+    #   测试boss
+    create_bosses(global_set, screen, stats, score_board, bosses, 1)
 
 
 def check_fleet_edges(global_set, aliens):
@@ -385,3 +392,14 @@ def update_fires(fires):
         #  删除已消失的子弹
         if fire.explode_index >= 7:
             fires.remove(fire)
+
+
+def create_bosses(global_set, screen, stats, score_board, bosses, alien_number):
+    #  创建一个外星人boos并将其放在当前行
+    alien_boss = AlienBosses(global_set, screen, stats)
+    alien_width = alien_boss.rect.width
+    alien_boss.x = alien_width * 0.2 + alien_width * alien_number
+    alien_boss.rect.x = alien_boss.x
+    alien_boss.y = score_board.score_bar_height + alien_boss.rect.height * 0.2
+    alien_boss.rect.y = alien_boss.y
+    bosses.add(alien_boss)
