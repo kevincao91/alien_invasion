@@ -20,6 +20,13 @@ class Scoreboards():
         self.score_bar_width = self.screen_rect.width
         self.score_bar_bg_color = (180, 180, 255)
         self.get_score_bar_height()
+        #  确定血条高度、宽度
+        self.hp_image = pygame.image.load('images/hp.png').convert_alpha()
+        self.hp_bg_image = pygame.image.load('images/hp_bg.png').convert_alpha()
+        self.hp_rect = self.hp_bg_image.get_rect()
+        self.hp_ori_rect_width = self.hp_rect.width
+        self.hp_ori_rect_height = self.hp_rect.height
+        self.hp_bg_rect = self.hp_bg_image.get_rect()
         #  准备分数栏图片，仅初始化时生成一次
         self.prep_score_bar()
         # 准备包含最高得分、当前得分、等级和飞船数的图像
@@ -62,6 +69,11 @@ class Scoreboards():
         self.screen.blit(self.high_score_image, self.high_score_rect)
         self.screen.blit(self.level_image, self.level_rect)
         self.ships.draw(self.screen)
+        #  判断是否显示boss血条
+        if self.stats.is_boss:
+            self.prep_boss_hp()
+            self.screen.blit(self.hp_bg_image, self.hp_bg_rect)
+            self.screen.blit(self.hp_surface, self.hp_surface_rect)
 
     def prep_high_score(self):
         #  将最高得分转换为渲染的图像
@@ -91,6 +103,19 @@ class Scoreboards():
             ship.rect.centery = self.score_bar_rect.centery
             ship.rect.x = 10 + ship_number * (ship.rect.width + 5)
             self.ships.add(ship)
+
+    def prep_boss_hp(self):
+        #  显示boss血量
+        #  根据血量调整长度
+        hp_rect_width = self.hp_ori_rect_width * self.stats.boss_HP / self.global_set.MAX_HP
+        self.hp_surface = self.hp_image.subsurface(pygame.Rect(0, 0, int(hp_rect_width), self.hp_ori_rect_height))
+        self.hp_surface_rect = self.hp_surface.get_rect()
+        #  将等级放在飞船数右方
+        self.hp_surface_rect.left = 160
+        self.hp_surface_rect.centery = self.score_bar_rect.centery
+        #  血条背景
+        self.hp_bg_rect.left = 160
+        self.hp_bg_rect.centery = self.score_bar_rect.centery
 
 
 

@@ -28,7 +28,7 @@ def check_keydown_events(event, stats, screen, global_set, score_board, ship, al
         quit_game(stats, global_set)
     elif event.key == pygame.K_RETURN:
         check_enter_button(global_set, screen, stats, score_board, ship, aliens, bullets, bosses)
-    elif stats.game_active:
+    elif stats.game_state:
         if event.key == pygame.K_RIGHT:
             ship.moving_right = True
         elif event.key == pygame.K_LEFT:
@@ -199,6 +199,8 @@ def start_game(global_set, screen, stats, score_board, aliens, ship, bullets, bo
         bosses.empty()
         #  创建一群新的外星人，并让飞船居中
         create_boss(global_set, screen, bosses)
+        #  外星人血量更新
+        stats.boss_HP = global_set.MAX_HP
         #  更新游戏状态信息   等待开始声音结束
         stats.game_state = 11
     else:
@@ -299,8 +301,9 @@ def check_bullet_boss_collisions(global_set, stats, screen, score_board, ship, a
             if len(liens):
                 sound_aliens(stats)
                 for boss in bosses:
-                    print(boss.HP)
-                    boss.HP -= 1
+                    #  外星人血量更新
+                    stats.boss_HP -= 1
+                    print(stats.boss_HP)
         #  创建火花状态
         create_fire(collisions, bullets, fires)
         #  更新计分牌
@@ -308,7 +311,7 @@ def check_bullet_boss_collisions(global_set, stats, screen, score_board, ship, a
         check_high_score(stats, score_board)
     #  检测游戏结束
     for boss in bosses:
-        if boss.HP <= 0:
+        if stats.boss_HP <= 0:
             if len(fires) == 0:
                 bosses.empty()
                 start_new_level(global_set, screen, stats, score_board, ship, aliens, bullets, bosses)
@@ -323,7 +326,7 @@ def create_boss(global_set, screen, bosses):
 
 
 def check_is_boss_level(stats):
-    if stats.level % 3:
+    if stats.level % 5:
         #  更新游戏状态
         stats.is_boss = False
         stats.game_state = 12  # 小怪
@@ -342,6 +345,8 @@ def start_new_level(global_set, screen, stats, score_board, ship, aliens, bullet
     bullets.empty()
     if check_is_boss_level(stats):
         create_boss(global_set, screen, bosses)
+        stats.boss_HP = global_set.MAX_HP
+        print(stats.boss_HP)
     else:
         global_set.increase_speed()
         create_fleet(global_set, screen, stats, score_board, ship, aliens)

@@ -48,6 +48,8 @@ class Settings():
         self.fleet_drop_speed = 0
         self.fleet_direction = 1
         self.alien_points = 0
+        #  boss血量
+        self.MAX_HP = 50
         #  外星人填充程度设置
         self.alien_high_fill_factor = 0.6
         # 外星人点数的提高速度

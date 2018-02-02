@@ -13,6 +13,7 @@ class GameStats():
         self.aliens_bullet_freeze_flag = True
         self.ship_freeze_flag = True
         self.is_boss = False
+        self.boss_HP = 0
         # 在任何情况下都不应重置最高得分
         self.high_score = 0
         #  让游戏一开始处于非活动状态
