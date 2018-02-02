@@ -92,6 +92,11 @@ def play_read_go(global_set):
     global_set.begin_audio_channel = global_set.begin_audio.play()
 
 
+def play_game_over(global_set):
+    pygame.mixer.music.stop()
+    global_set.over_audio_channel = global_set.over_audio.play()
+
+
 def check_sound(global_set, stats):
     if stats.game_state in [10, 11, 12, 13]:
         if not global_set.begin_audio_channel.get_busy():
@@ -99,12 +104,18 @@ def check_sound(global_set, stats):
                 stats.game_state = 21
             else:
                 stats.game_state = 20
-    if stats.game_state in [30, 31]:
+    elif stats.game_state in [30, 31]:
         if not global_set.ship_hit_audio_channel.get_busy():
             if stats.game_state % 2 == 0:
                 stats.game_state = 41
             else:
                 stats.game_state = 40
+    elif stats.game_state == 5:
+        if not global_set.over_audio_channel.get_busy():
+            stats.game_state = 0
+            pygame.mixer.music.play(-1, 0.0)
+            # 光标可见
+            pygame.mouse.set_visible(True)
 
 
 def game_state_control(global_set, stats, screen, score_board, ship, aliens, bullets, bosses):
@@ -120,6 +131,7 @@ def game_state_control(global_set, stats, screen, score_board, ship, aliens, bul
     #  31               激活状态     不可移动    不移动       不能产生   boss坠机，播放坠机声音阶段
     #  40               激活状态     不可移动    不移动       不能产生   判断游戏是否继续阶段
     #  41               激活状态     不可移动    不移动       不能产生   boss判断游戏是否继续阶段
+    #  5                激活状态     不可移动    不移动       不能产生   游戏结束，等待声音结束阶段
 
     if stats.game_state == 0:
         stats.aliens_bullet_freeze_flag = True
@@ -175,6 +187,11 @@ def game_state_control(global_set, stats, screen, score_board, ship, aliens, bul
         stats.ship_freeze_flag = True
         #  判断下一步处理
         level_again_or_start_new_level(global_set, stats, screen, score_board, ship, aliens, bullets, bosses)
+    elif stats.game_state == 5:
+        stats.game_active = True
+        stats.aliens_bullet_freeze_flag = True
+        stats.ship_freeze_flag = True
+        check_sound(global_set, stats)
 
 
 def initialize_and_start_game(global_set, screen, stats, score_board, aliens, ship, bullets, bosses):
@@ -310,11 +327,10 @@ def check_bullet_boss_collisions(global_set, stats, screen, score_board, ship, a
         score_board.prep_score()
         check_high_score(stats, score_board)
     #  检测游戏结束
-    for boss in bosses:
-        if stats.boss_HP <= 0:
-            if len(fires) == 0:
-                bosses.empty()
-                start_new_level(global_set, screen, stats, score_board, ship, aliens, bullets, bosses)
+    if stats.boss_HP <= 0:
+        if len(fires) == 0:
+            bosses.empty()
+            start_new_level(global_set, screen, stats, score_board, ship, aliens, bullets, bosses)
 
 
 def create_boss(global_set, screen, bosses):
@@ -344,6 +360,7 @@ def start_new_level(global_set, screen, stats, score_board, ship, aliens, bullet
     #  删除现有的所有子弹
     bullets.empty()
     if check_is_boss_level(stats):
+        global_set.boss_increase_speed()
         create_boss(global_set, screen, bosses)
         stats.boss_HP = global_set.MAX_HP
         print(stats.boss_HP)
@@ -453,14 +470,14 @@ def level_again_or_start_new_level(global_set, stats, screen, score_board, ship,
         #  重开此level
         start_game(global_set, screen, stats, score_board, aliens, ship, bullets, bosses)
     else:
-        game_over(stats)
+        game_over(global_set, stats)
 
 
-def game_over(stats):
+def game_over(global_set, stats):
     #  更新游戏状态信息  坠机阶段
-    stats.game_state = 0
-    # 光标可见
-    pygame.mouse.set_visible(True)
+    stats.game_state = 5
+    #  播放结束声音
+    play_game_over(global_set)
 
 
 def check_aliens_bottom(screen, aliens):

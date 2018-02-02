@@ -23,7 +23,7 @@ class AlienBosses(Sprite):
         self.y = float(self.rect.y)
         #  外星人boss游戏性设置
         #  初始速度、方向
-        self.initial_speed = round(random.uniform(0, 1.0), 2)
+        self.initial_speed = round(random.uniform(0.5, 1.0), 2)
         self.initial_speed_angle = round(random.uniform(180, 360))
         #  speed[x方向速度  y方向速度]
         self.speed_angle = self.initial_speed_angle
